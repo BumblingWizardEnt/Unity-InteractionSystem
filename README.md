@@ -6,3 +6,5 @@ Add the Interaction Manager to a gameobject
 Add an interactable script to an item (Interactable_FenceGate)
 
 When interact is pressed, it will run the Interact() method, which is inherited from the base script, "Interactable".
+
+It's nothing super fancy; I only spent an hour putting it together. It is very scalable, optimized, and free! If you have any suggestions let me know!
