@@ -34,11 +34,10 @@ namespace BumblingWizard
         // reference to get the player (Could just put the player here instead)
         GameManager gameManager;
 
-        // used to later stop the coroutine if need be
-        private Coroutine monitorRoutine;
-
         // reference to the player transform
         private Transform playerTransform;
+
+        private float timeSinceLastUpdate = 0;
 
         private void Awake()
         {
@@ -48,31 +47,27 @@ namespace BumblingWizard
             // a reference to the game manager so we can get reference to the player
             gameManager = GetComponent<GameManager>();
             playerTransform = gameManager.Player.transform;
+            timeSinceLastUpdate = Time.time;
+        }
+
+        private void Update()
+        {
+            if (Time.time - timeSinceLastUpdate > updateFrequency)
+            {
+                timeSinceLastUpdate = Time.time;
+                MonitorInteractableObjects();
+            }
         }
 
         private void OnEnable()
         {
-            monitorRoutine = StartCoroutine(MonitorRoutine());
             DeinitPlayerInput();
             InitPlayerInput();
         }
 
         private void OnDisable()
         {
-            if (monitorRoutine != null)
-                StopCoroutine(monitorRoutine);
             DeinitPlayerInput();
-        }
-
-        private IEnumerator MonitorRoutine()
-        {
-            var wait = new WaitForSeconds(updateFrequency);
-
-            while (true)
-            {
-                MonitorInteractableObjects();
-                yield return wait;
-            }
         }
 
         // Runs on loop 
@@ -80,14 +75,15 @@ namespace BumblingWizard
         {
             float minDist = float.MaxValue;
             Interactable nearestInteraction = null;
+            float sqrDist = 0, maxDist = 0;
 
             // gather which interactable object is closest to the player 
             foreach (var interactable in interactableObjects)
             {
                 if (interactable == null) continue;
 
-                float sqrDist = (playerTransform.position - interactable.transform.position).sqrMagnitude;
-                float maxDist = minDistanceToInteract * minDistanceToInteract;
+                sqrDist = (playerTransform.position - interactable.transform.position).sqrMagnitude;
+                maxDist = minDistanceToInteract * minDistanceToInteract;
 
                 if (sqrDist < 0.01f)
                 {
